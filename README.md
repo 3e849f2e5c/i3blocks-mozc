@@ -16,6 +16,8 @@ i3blocks の設定ファイルで
 command=~/.config/i3blocks/blocks/mozc_status
 label=<span color="#cc294c"> </span>
 interval=persist
+MOZC_DISPLAY_MODE=0
+MOZC_DISPLAY_ROMAJI=0
 min_width=" あ"
 ```
 
@@ -39,6 +41,8 @@ In i3blocks config file
 command=~/.config/i3blocks/blocks/mozc_status
 label=<span color="#cc294c"> </span>
 interval=persist
+MOZC_DISPLAY_MODE=0
+MOZC_DISPLAY_ROMAJI=0
 min_width=" あ"
 ```
 
