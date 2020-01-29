@@ -6,10 +6,30 @@ import (
 	"os"
 )
 
-func main() {
-	var connection, err = dbus.ConnectSessionBus()
+func getStatus () string {
+	var connection, err= dbus.ConnectSessionBus()
 	if err != nil {
-		fmt.Println("Bruh " + err.Error())
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
+	obj := connection.Object("org.fcitx.Fcitx", "/Status")
+	call := obj.Call("org.fcitx.Fcitx.Status.Get", 0, "mozc-composition-mode")
+	if call.Err != nil {
+		fmt.Println(call.Err)
+		os.Exit(1)
+	}
+
+	if len(call.Body) >= 1 && call.Body[0] != "" {
+		return formatLetter(call.Body[0].(string))
+	} else {
+		return "あ"
+	}
+}
+
+func main() {
+	var connection, err= dbus.ConnectSessionBus()
+	if err != nil {
+		fmt.Println(err.Error())
 		os.Exit(1)
 	}
 
@@ -28,25 +48,28 @@ func main() {
 	var messages = make(chan *dbus.Message)
 	connection.Eavesdrop(messages)
 
-	var oldMode = "あ"
+	var oldMode = getStatus()
 
 	fmt.Println(oldMode)
 	for v := range messages {
 		if len(v.Body) >= 3 {
 			var newMode = v.Body[1].(string)
 			if oldMode != newMode {
-				switch newMode {
-					case "A":
-						fmt.Println("Ａ")
-						break
-					case "ｱ":
-						fmt.Println("ｱ\u2423")
-						break
-					default:
-						fmt.Println(newMode)
-				}
-				oldMode = newMode
+				var mode = formatLetter(newMode)
+				fmt.Println(mode)
+				oldMode = mode
 			}
 		}
+	}
+}
+
+func formatLetter (letter string) string {
+	switch letter {
+	case "A":
+		return "Ａ"
+	case "ｱ":
+		return "ｱ\u2423"
+	default:
+		return letter
 	}
 }
