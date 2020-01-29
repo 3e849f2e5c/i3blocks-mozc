@@ -12,6 +12,9 @@ func getStatus () string {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
+
+	defer connection.Close()
+
 	obj := connection.Object("org.fcitx.Fcitx", "/Status")
 	call := obj.Call("org.fcitx.Fcitx.Status.Get", 0, "mozc-composition-mode")
 	if call.Err != nil {
