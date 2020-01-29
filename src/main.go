@@ -6,6 +6,9 @@ import (
 	"os"
 )
 
+var fullText = os.Getenv("MOZC_DISPLAY_MODE") == "1"
+var romaji = os.Getenv("MOZC_DISPLAY_ROMAJI") == "1"
+
 func getStatus () string {
 	var connection, err= dbus.ConnectSessionBus()
 	if err != nil {
@@ -22,14 +25,28 @@ func getStatus () string {
 		os.Exit(1)
 	}
 
-	if len(call.Body) >= 1 && call.Body[0] != "" {
-		return formatLetter(call.Body[0].(string))
+
+	if len(call.Body) >= 2 {
+		var body = ""
+		if fullText { body = call.Body[1].(string) } else { body = call.Body[0].(string) }
+		if body != "" {
+			return format(body)
+		} else {
+			return "Error"
+		}
 	} else {
-		return "あ"
+		if fullText {
+			return "ひらがな"
+		} else {
+			return "あ"
+		}
 	}
 }
 
 func main() {
+	var oldMode = getStatus()
+	fmt.Println(oldMode)
+
 	var connection, err= dbus.ConnectSessionBus()
 	if err != nil {
 		fmt.Println(err.Error())
@@ -44,35 +61,50 @@ func main() {
 	var call = connection.BusObject().Call(monitor, 0, []string{rule}, uint(0))
 
 	if call.Err != nil {
-		fmt.Println("Bruh " + call.Err.Error())
+		fmt.Println(call.Err.Error())
 		os.Exit(1)
 	}
 
 	var messages = make(chan *dbus.Message)
 	connection.Eavesdrop(messages)
 
-	var oldMode = getStatus()
-
-	fmt.Println(oldMode)
 	for v := range messages {
 		if len(v.Body) >= 3 {
-			var newMode = v.Body[1].(string)
-			if oldMode != newMode {
-				var mode = formatLetter(newMode)
-				fmt.Println(mode)
-				oldMode = mode
+			var body = ""
+			if fullText { body = v.Body[2].(string) } else { body = v.Body[1].(string) }
+			if oldMode != body {
+				fmt.Println(format(body))
+				oldMode = body
 			}
 		}
 	}
 }
 
-func formatLetter (letter string) string {
-	switch letter {
-	case "A":
-		return "Ａ"
-	case "ｱ":
-		return "ｱ\u2423"
-	default:
-		return letter
+func format (input string) string {
+	if fullText {
+		if romaji {
+			return input
+		}
+		switch input {
+		case "Direct":
+			return "ローマ字"
+		case "Hiragana":
+			return "ひらがな"
+		case "Full Katakana":
+			return "全カタカナ"
+		case "Half Katakana":
+			return "半カタカナ"
+		}
+		return input
+	} else {
+		switch input {
+		case "A":
+			return "Ａ"
+		case "ｱ":
+			return "ｱ\u2423"
+		default:
+			return input
+		}
 	}
+
 }
