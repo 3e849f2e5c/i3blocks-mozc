@@ -9,8 +9,8 @@ import (
 var fullText = os.Getenv("MOZC_DISPLAY_MODE") == "1"
 var romaji = os.Getenv("MOZC_DISPLAY_ROMAJI") == "1"
 
-func getStatus () string {
-	var connection, err= dbus.ConnectSessionBus()
+func getStatus() string {
+	var connection, err = dbus.ConnectSessionBus()
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
@@ -20,15 +20,18 @@ func getStatus () string {
 
 	obj := connection.Object("org.fcitx.Fcitx", "/Status")
 	call := obj.Call("org.fcitx.Fcitx.Status.Get", 0, "mozc-composition-mode")
+
 	if call.Err != nil {
 		fmt.Println(call.Err)
 		os.Exit(1)
 	}
-
-
 	if len(call.Body) >= 2 {
 		var body = ""
-		if fullText { body = call.Body[1].(string) } else { body = call.Body[0].(string) }
+		if fullText {
+			body = call.Body[1].(string)
+		} else {
+			body = call.Body[0].(string)
+		}
 		if body != "" {
 			return format(body)
 		} else {
@@ -47,7 +50,7 @@ func main() {
 	var oldMode = getStatus()
 	fmt.Println(oldMode)
 
-	var connection, err= dbus.ConnectSessionBus()
+	var connection, err = dbus.ConnectSessionBus()
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
@@ -71,7 +74,11 @@ func main() {
 	for v := range messages {
 		if len(v.Body) >= 3 {
 			var body = ""
-			if fullText { body = v.Body[2].(string) } else { body = v.Body[1].(string) }
+			if fullText {
+				body = v.Body[2].(string)
+			} else {
+				body = v.Body[1].(string)
+			}
 			if oldMode != body {
 				fmt.Println(format(body))
 				oldMode = body
@@ -80,7 +87,7 @@ func main() {
 	}
 }
 
-func format (input string) string {
+func format(input string) string {
 	if fullText {
 		if romaji {
 			return input
@@ -106,5 +113,4 @@ func format (input string) string {
 			return input
 		}
 	}
-
 }
