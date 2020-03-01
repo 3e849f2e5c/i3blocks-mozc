@@ -73,15 +73,17 @@ func main() {
 
 	for v := range messages {
 		if len(v.Body) >= 3 {
-			var body = ""
-			if fullText {
-				body = v.Body[2].(string)
-			} else {
-				body = v.Body[1].(string)
-			}
-			if oldMode != body {
-				fmt.Println(format(body))
-				oldMode = body
+			if v.Body[0].(string) == "mozc-composition-mode" {
+				var body = ""
+				if fullText {
+					body = v.Body[2].(string)
+				} else {
+					body = v.Body[1].(string)
+				}
+				if oldMode != body {
+					fmt.Println(format(body))
+					oldMode = body
+				}
 			}
 		}
 	}

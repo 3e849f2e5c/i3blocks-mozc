@@ -1,6 +1,6 @@
 # i3blocks Mozc
 
-i3blocks に Mozc ステータスを表示
+`i3blocks`に`Mozc`ステータスを表示
 
 ## 推奨環境
 
@@ -9,7 +9,7 @@ i3blocks に Mozc ステータスを表示
 
 ## 使用例
 
-i3blocks の設定ファイルで
+`i3blocks`の設定ファイルで
 
 ```
 [mozc_status]
